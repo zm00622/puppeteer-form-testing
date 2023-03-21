@@ -16,12 +16,9 @@ const { executablePath } = require("puppeteer");
   console.log("Navigating to RVCB...");
   await page.goto('https://www.rvclickbuy.com/');
   console.log("website loaded");
-  //   await page.waitForTimeout(50000);
-  console.log("timeout started");
- 
+  await page.waitForSelector('form'); // wait for the form to be loaded
 
-  // Apply Text to Form Fields. Await page.evalute and the callback function allows one to execute vanilla javascript within puppeteer.
-
+  // Apply Text to Form Fields. Await page.evaluate and the callback function allows one to execute vanilla javascript within puppeteer.
   await page.evaluate(() => {
     const dummyData = {
       name: "John Doe",
@@ -40,12 +37,12 @@ const { executablePath } = require("puppeteer");
       state: "FL",
     };
     console.log(dummyData.name);
-    
+
     const fillAllInputsAndTextareasWithDummyData = () => {
       const inputElements = document.querySelectorAll("input");
       const textareaElements = document.querySelectorAll("textarea");
       const numberElements = document.querySelectorAll('input[type="number"]');
-  
+
       inputElements.forEach((input) => {
         if (
           input.type !== "submit" &&
@@ -55,17 +52,25 @@ const { executablePath } = require("puppeteer");
           input.value = dummyData[input.name] || `Testing Disregard`; // try to fill with matching dummy value or "Testing" otherwise
         }
       });
-  
+
       textareaElements.forEach((textarea) => {
         textarea.value = dummyData[textarea.name] || "Testing"; // try to fill with matching dummy value or "Testing" otherwise
       });
     };
-  
+
     fillAllInputsAndTextareasWithDummyData();
     console.log("The code has executed past the final function");
     // End of Applying Text to Form Fields  
-});
+  });
 
-  await page.waitForTimeout(50000);
+  // Click the "SIGN UP" button
+  const button = await page.$('button[type="submit"]:not([disabled])');
+  if (button) {
+    await button.click();
+  } else {
+    console.error('Unable to find "SIGN UP" button');
+  }
+
+  await page.waitForTimeout(5000);
   await browser.close();
 })();
